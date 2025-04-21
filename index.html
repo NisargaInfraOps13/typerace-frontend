@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TypeRace Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      text-align: center;
+      padding: 50px;
+    }
+    #leaderboard {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 10px;
+      width: 400px;
+      margin: auto;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 TypeRace Game</h1>
+  <p>Enter your name and time to join the leaderboard!</p>
+  <input type="text" id="username" placeholder="Your name" />
+  <input type="number" id="time" placeholder="Time (seconds)" />
+  <button onclick="submitTime()">Submit</button>
+
+  <div id="leaderboard">
+    <h2>🏆 Leaderboard</h2>
+    <ul id="board"></ul>
+  </div>
+
+  <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+  <script>
+    const socket = io('https://typerace-backend.onrender.com'); // Replace with your actual backend URL
+
+    socket.on('connect', () => {
+      console.log('Connected to backend!');
+    });
+
+    function submitTime() {
+      const username = document.getElementById('username').value;
+      const time = parseFloat(document.getElementById('time').value);
+      if (!username || isNaN(time)) {
+        alert('Please fill both fields correctly!');
+        return;
+      }
+      socket.emit('finished', { username, time });
+    }
+
+    socket.on('updateLeaderboard', (data) => {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      data.forEach((entry, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${entry.username} - ${entry.time}s`;
+        board.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
